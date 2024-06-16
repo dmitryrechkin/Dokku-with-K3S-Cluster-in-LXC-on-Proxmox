@@ -256,8 +256,9 @@ Next, we'll install Dokku on the server, by following directions from https://do
 
 3. **Configure your server domain:**
     ```sh
-    dokku domains:set-global
+    dokku domains:set-global dokku.me
     ```
+   where `dokku.me` is your domain.
 
 4. **Add your public SSH key to Dokku:**
     ```sh
