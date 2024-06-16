@@ -270,7 +270,7 @@ Now let's set up our Dokku server to use a managed K3S scheduler for a multi-nod
 
 1. **Initialize as a multi-node cluster:**
     ```sh
-    dokku scheduler-k3s:initialize --taint-scheduling
+    sudo dokku scheduler-k3s:initialize --taint-scheduling
     ```
 
 2. **Determine the network interface used for your private network:**
