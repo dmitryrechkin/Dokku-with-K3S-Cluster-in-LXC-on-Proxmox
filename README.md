@@ -256,9 +256,8 @@ Next, we'll install Dokku on the server, by following directions from https://do
 
 3. **Configure your server domain:**
     ```sh
-    dokku domains:set-global dokku.me
+    dokku domains:set-global $YOUR_DOMAIN
     ```
-   where `dokku.me` is your domain.
 
 4. **Add your public SSH key to Dokku:**
     ```sh
@@ -274,27 +273,47 @@ Now let's set up our Dokku server to use a managed K3S scheduler for a multi-nod
     sudo dokku scheduler-k3s:initialize --taint-scheduling
     ```
 
-2. **Determine the network interface used for your private network:**
+2. **Configure Docker registry credentials:**
+    ```sh
+    dokku registry:login hub.docker.com $USERNAME $PASSWORD
+    ```
+    
+3. **Set the correct server registry:**
+    ```sh
+    dokku registry:set --global server hub.docker.com
+    ```
+    
+4. **Set a custom repository name:**
+    ```sh
+    dokku registry:set --global image-repo-template "$USERNAME/{{ .AppName }}"
+    ```
+
+5. **Set to push images on the release phase:**
+    ```sh
+    dokku registry:set --global push-on-release true
+    ```
+
+6. **Determine the network interface used for your private network:**
     ```sh
     sudo ifconfig
     ```
 
-3. **Set the correct network device for K3S (e.g., `eth1`):**
+7. **Set the correct network device for K3S (e.g., `eth1`):**
     ```sh
     dokku scheduler-k3s:set --global network-interface eth1
     ```
 
-4. **Set the proxy plugin to K3S:**
+8. **Set the proxy plugin to K3S:**
     ```sh
     dokku proxy:set --global k3s
     ```
 
-5. **Stop any other proxy implementations (e.g., NGINX):**
+9. **Stop any other proxy implementations (e.g., NGINX):**
     ```sh
     dokku nginx:stop
     ```
 
-6. **Set the scheduler to K3S:**
+10. **Set the scheduler to K3S:**
     ```sh
     dokku scheduler:set --global selected k3s
     ```
