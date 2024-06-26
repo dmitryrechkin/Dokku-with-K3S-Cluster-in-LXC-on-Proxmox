@@ -512,6 +512,21 @@ dokku letsencrypt:enable node-js-getting-started
     kubectl describe node <node-name>
     ```
 
+## Troubleshooting
+
+1. Low disk space can cause the following error:
+```
+/home/dokku/.basher/bash: line 1: main: command not found
+ !     /home/dokku/.basher/bash: line 1: main: command not found
+```
+
+This error occurs because Docker retains images that consume more space over time.
+
+To resolve this issue, prune Docker by running:
+```
+docker system prune -a
+```
+
 ## Helpful Resources
 
 - The following article was the main source of the information and instructions here were just reworked for the specific Dokku use case, so check it out: [https://betterprogramming.pub/rancher-k3s-kubernetes-on-proxmox-containers-2228100e2d13](https://betterprogramming.pub/rancher-k3s-kubernetes-on-proxmox-containers-2228100e2d13)
