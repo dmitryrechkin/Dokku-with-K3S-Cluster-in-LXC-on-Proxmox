@@ -81,6 +81,7 @@ Since our LXC containers need to run Docker containers, we need to configure the
 7. Set DNS settings.
 
     ![Choose Network](./images/create-lxc-container-dns.png "Choose Network")
+    It is better to leave the DNS domain entry empty unless it is configured to point to your server. Otherwise, it can cause TLS/SSL handshake issues for outbound traffic from the k3s pods.
 
 8. Review your container settings and click **Finish**.
 
@@ -512,20 +513,23 @@ dokku letsencrypt:enable node-js-getting-started
     kubectl describe node <node-name>
     ```
 
-## Troubleshooting
+7. **Low Disk Space**
+    Low disk space can cause the following error:
+    ```sh
+    /home/dokku/.basher/bash: line 1: main: command not found
+     !     /home/dokku/.basher/bash: line 1: main: command not found
+    ```
 
-1. Low disk space can cause the following error:
-```
-/home/dokku/.basher/bash: line 1: main: command not found
- !     /home/dokku/.basher/bash: line 1: main: command not found
-```
+    This error occurs because Docker retains images that consume more space over time.
 
-This error occurs because Docker retains images that consume more space over time.
+    To resolve this issue, prune Docker by running:
+    ```sh
+    docker system prune -a
+    ```
 
-To resolve this issue, prune Docker by running:
-```
-docker system prune -a
-```
+8. **TLS/SSL Handshake Errors for Outbound Traffic from k3s Pods**
+    These errors can be caused by the presence of the `option ndots:5` in /etc/resolv.conf of the pods.\
+    To resolve this issue, the easiest solution is to remove the DNS domain from the settings of the LXC container.
 
 ## Helpful Resources
 
