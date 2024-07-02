@@ -81,9 +81,10 @@ Since our LXC containers need to run Docker containers, we need to configure the
 7. Set DNS settings.
 
     ![Choose Network](./images/create-lxc-container-dns.png "Choose Network")
+
     It is better to leave the DNS domain entry empty unless it is configured to point to your server. Otherwise, it can cause TLS/SSL handshake issues for outbound traffic from the k3s pods.
 
-8. Review your container settings and click **Finish**.
+9. Review your container settings and click **Finish**.
 
     ![Confirm](./images/create-lxc-container-confirm.png "Confirm")
 
