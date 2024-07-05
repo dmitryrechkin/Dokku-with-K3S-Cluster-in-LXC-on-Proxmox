@@ -467,6 +467,108 @@ dokku letsencrypt:set node-js-getting-started email your@email.com
 dokku letsencrypt:enable node-js-getting-started
 ```
 
+## Autoscaling with KEDA on a K3s Cluster with Dokku
+
+This guide will walk you through setting up a simple autoscaler for a Dokku application on a K3s cluster using KEDA. We will configure an autoscaler to scale based on CPU utilization.
+
+### Step 1: Install Metrics Server
+
+Install the Metrics Server using Helm to enable resource metrics collection in your K3s cluster.
+
+```sh
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+### Step 2: Create `app.json` for Autoscaling
+
+Create or update the `app.json` file in your Dokku application's repository to include autoscaling settings. Here is an example configuration:
+
+```json
+{
+  "formation": {
+    "web": {
+      "autoscaling": {
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "polling_interval_seconds": 10,
+        "cooldown_seconds": 120,
+        "triggers": [
+          {
+            "type": "cpu",
+            "metricType": "Utilization",
+            "metadata": {
+              "value": "50"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+This configuration will scale your application between 1 and 2 instances based on CPU utilization. You will have to experiment to find how many pods you can run in parallel.
+
+### Step 3: Deploy Your Application
+
+Deploy your application to Dokku to apply the app.json configuration.
+
+```sh
+git add app.json
+git commit -m "Add autoscaling configuration"
+git push dokku main
+```
+
+### Step 4: Verify Installation
+
+Check if the Metrics Server and your application pods are running:
+
+```sh
+kubectl get pods -n kube-system | grep metrics-server
+kubectl get pods -l app.kubernetes.io/instance=your-app-instance-name
+```
+
+### Step 5: Monitor and Troubleshoot
+
+#### Check HPA Status:
+
+```sh
+kubectl get hpa
+kubectl describe hpa keda-hpa-your-app-name
+```
+
+#### Check Metrics Server Logs:
+
+```sh
+kubectl logs -n kube-system $(kubectl get pods -n kube-system -l k8s-app=metrics-server -o jsonpath="{.items[0].metadata.name}")
+```
+
+#### Verify Pod Readiness:
+
+Check if the pods are ready and reporting metrics:
+
+```sh
+kubectl get pods -l app.kubernetes.io/instance=your-app-instance-name -o wide
+kubectl describe pod <pod-name>
+```
+
+#### Simulate Load
+
+Generate load to test autoscaling:
+
+```sh
+ab -c 100 -n 1000 https://<your-service-url>/
+```
+
+#### Monitor Scaling
+
+Monitor the HPA and the number of pods during the load test:
+
+```sh
+kubectl get hpa
+kubectl get pods -l app.kubernetes.io/instance=your-app-instance-name
+kubectl describe hpa keda-hpa-your-app-name
+```
+
 ## Troubleshooting
 
 1. **Check Systemctl Status of K3S**
