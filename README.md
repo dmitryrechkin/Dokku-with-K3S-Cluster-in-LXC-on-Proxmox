@@ -471,6 +471,32 @@ dokku letsencrypt:enable node-js-getting-started
 
 This guide will walk you through setting up a simple autoscaler for a Dokku application on a K3s cluster using KEDA. We will configure an autoscaler to scale based on CPU utilization.
 
+### Prerequisites
+
+By default, any app has a reservation of 0.1 CPU (100m) and 128Mi RAM, with no set limit for either CPU or RAM. This means that a single instance of a pod can theoretically consume all the resources of the node, making scaling within the same node inefficient. To efficiently scale, it's important to limit the resources available to a single app.
+
+#### Setting Resource Limits
+
+To limit the resources for your app, you can use the following command from the app's folder:
+
+```sh
+dokku resource:limit --cpu 500m --memory 1024Mi
+```
+
+Here:
+    - 500m means 500 millicores (with 1 CPU defined as 1000 millicores).
+    - 1024Mi is 1024 megabytes of memory.
+
+### Applying the Limits
+
+After setting the limits, redeploy your app. The new limits will be applied during the next deployment. Push your app to Dokku again to enforce these limits.
+
+```sh
+git push dokku main
+```
+
+By setting these limits, you ensure that no single app can monopolize the node’s resources, allowing for more efficient scaling and better resource management across your applications.
+
 ### Step 1: Install Metrics Server
 
 Install the Metrics Server using Helm to enable resource metrics collection in your K3s cluster.
